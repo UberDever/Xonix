@@ -6,13 +6,7 @@
 
 class Config
 {
-public:
-
-	std::unordered_map<SDL_Keycode, enums::GameEvent> eventMap;
-	const int windowWidth = 1280;
-	const int windowHeight = 1024;
-
-public:
+private:
 
 	Config()
 	{
@@ -21,15 +15,28 @@ public:
 		eventMap[SDLK_s] = enums::GameEvent::Down;
 		eventMap[SDLK_d] = enums::GameEvent::Right;
 		eventMap[SDLK_ESCAPE] = enums::GameEvent::Quit;
-		eventMap[SDLK_LEFT] = enums::GameEvent::ArrowLeft;
-		eventMap[SDLK_RIGHT] = enums::GameEvent::ArrowRight;
-		eventMap[SDLK_UP] = enums::GameEvent::ArrowUp;
-		eventMap[SDLK_DOWN] = enums::GameEvent::ArrowDown;
 	}
+
+	Config(const Config&) = delete;
+	Config& operator=(Config&) = delete;
+
+public:
+
+	std::unordered_map<SDL_Keycode, enums::GameEvent> eventMap;
+	const int windowWidth = 1440;
+	const int windowHeight = 900;
+
+public:
 
 	void load()
 	{
 
+	}
+
+	static Config& getConfig()
+	{
+		static Config instance;
+		return instance;
 	}
 
 	bool parseEvent(SDL_Event& rawEvent, enums::GameEvent& gameEvent)
@@ -50,5 +57,3 @@ public:
 		return false;	
 	}
 };
-
-static Config globalConfig;

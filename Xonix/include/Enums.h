@@ -9,10 +9,20 @@ namespace enums
 		Right,
 		Up,
 		Down,
-		ArrowLeft,
-		ArrowRight,
-		ArrowUp,
-		ArrowDown,
+		Options,
+		LeaderBoard,
+		Start,
 		MouseButtonPressed
+	};
+
+	enum class TileType
+	{
+		Void,
+		Wall,
+		PlayerSide,
+		PlayerVoid,
+		PlayerTrail,
+		Enemy,
+		EnemySide
 	};
 }
