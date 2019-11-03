@@ -5,10 +5,11 @@ void Enemy::BFS()
 
 }
 
-void Enemy::init(enums::TileType** gameMapInstance, enums::TileType curType)
+void Enemy::init(enums::TileType** _gameMap, enums::TileType _type)
 {
-	gameMap = gameMapInstance;
-	type = curType;
+	gameMap = _gameMap;
+	type = _type;
+	vec.x = vec.y = 1;
 	if (type == enums::TileType::Enemy)
 	{
 		pos.x = rand() % ((int)(Config::getConfig().windowWidth / 18) - 4) + 2;
@@ -19,8 +20,13 @@ void Enemy::init(enums::TileType** gameMapInstance, enums::TileType curType)
 	gameMap[pos.y][pos.x] = type;
 }
 
+void Enemy::handleEvent(const enums::GameEvent& event)
+{
 
-void Enemy::update()
+}
+
+
+Entity* Enemy::update()
 {
 	enums::TileType curWall = (type == enums::TileType::EnemySide) ? enums::TileType::Wall : enums::TileType::Void;
 	static int borderY = Config::getConfig().windowHeight / 18;
@@ -42,4 +48,70 @@ void Enemy::update()
 	pos.y += vec.y;
 	pos.x += vec.x;
 	gameMap[pos.y][pos.x] = type;
+	return this;
+}
+
+/*****************************************************************************************************************************/
+
+void Player::init(enums::TileType** _gameMap, enums::TileType _type)
+{
+	gameMap = _gameMap;
+	type = _type;
+	pos.y = 0;
+	pos.x = Config::getConfig().windowWidth / 18 / 2;
+	gameMap[pos.y][pos.x] = type;
+}
+
+void Player::handleEvent(const enums::GameEvent& event)
+{
+	switch (event)
+	{
+	case enums::GameEvent::Up:
+	{
+		vec.x = 0; vec.y = -1;
+		break;
+	}
+	case enums::GameEvent::Down:
+	{
+		vec.x = 0; vec.y = 1;
+		break;
+	}
+	case enums::GameEvent::Left:
+	{
+		vec.x = -1; vec.y = 0;
+		break;
+	}
+	case enums::GameEvent::Right:
+	{
+		vec.x = 1; vec.y = 0;
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+}
+
+Entity* Player::update()
+{
+	static enums::TileType floor = enums::TileType::Wall;
+	static int borderY = Config::getConfig().windowHeight / 18;
+	static int borderX = Config::getConfig().windowWidth / 18;
+	if (!((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0) && (pos.x + vec.x < borderX) && (pos.x + vec.x >= 0)))
+	{
+		vec.x = vec.y = 0;
+	}
+	if (gameMap[pos.y + vec.y][pos.x + vec.x] == enums::TileType::PlayerTrail)
+	{
+		delete this;
+		return nullptr;
+	}
+	gameMap[pos.y][pos.x] = floor == enums::TileType::Wall ? floor : enums::TileType::PlayerTrail;
+	pos.y += vec.y;
+	pos.x += vec.x;
+	floor = gameMap[pos.y][pos.x];
+	type = floor == enums::TileType::Void ? enums::TileType::PlayerVoid : enums::TileType::PlayerSide;
+	gameMap[pos.y][pos.x] = type;
+	return this;
 }

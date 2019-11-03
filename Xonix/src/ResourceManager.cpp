@@ -8,7 +8,10 @@ ResourceManager::ResourceManager() : sprites{nullptr}
 
 ResourceManager::~ResourceManager()
 {
-
+	for (int i = 0; i < 7; i++)
+	{
+		SDL_DestroyTexture(sprites[i]);
+	}
 }
 
 bool ResourceManager::init(SDL_Renderer* renderer)
@@ -21,6 +24,7 @@ bool ResourceManager::init(SDL_Renderer* renderer)
 		if (temp = IMG_Load(tempS.c_str()))
 		{
 			sprites[i] = SDL_CreateTextureFromSurface(renderer, temp);
+			SDL_FreeSurface(temp);
 		}
 		else
 			return false;

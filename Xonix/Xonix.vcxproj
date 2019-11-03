@@ -176,6 +176,8 @@
   <ItemGroup>
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\GameField.cpp" />
+    <ClCompile Include="src\GamePlay.cpp" />
+    <ClCompile Include="src\GraphicManager.cpp" />
     <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -187,9 +189,19 @@
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\Enums.h" />
     <ClInclude Include="include\Game.h" />
+    <ClInclude Include="include\GamePlay.h" />
+    <ClInclude Include="include\GraphicManager.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\MainMenu.h" />
     <ClInclude Include="include\ResourceManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libfreetype-6.dll" />
+    <None Include="libpng16-16.dll" />
+    <None Include="SDL2.dll" />
+    <None Include="SDL2_image.dll" />
+    <None Include="SDL2_ttf.dll" />
+    <None Include="zlib1.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

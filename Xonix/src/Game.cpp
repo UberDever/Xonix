@@ -74,9 +74,13 @@ int Game::onExec()
 			mainScene = mainScene->update();
 
 			if (mainScene == nullptr)
-				return 0;
+			{
+				isRunning = false;
+				continue;
+			}
 
 			mainScene->render(mainRenderer);
+			SDL_RenderPresent(mainRenderer);
 		}
 	}
 

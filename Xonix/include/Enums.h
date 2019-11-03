@@ -4,6 +4,7 @@ namespace enums
 {
 	enum class GameEvent
 	{
+		Void = 0,
 		Quit,
 		Left,
 		Right,
@@ -11,6 +12,8 @@ namespace enums
 		Down,
 		Options,
 		LeaderBoard,
+		BeginGame,
+		GameOver,
 		Start,
 		MouseButtonPressed
 	};

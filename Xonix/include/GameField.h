@@ -1,10 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 #include "ResourceManager.h"
+#include "GraphicManager.h"
 #include "Config.h"
 #include "Enums.h"
 #include "Scene.h"
@@ -13,17 +15,22 @@
 class GameField : public Scene
 {
 private:
+	static int levelCounter;
+
 	enums::TileType **gameMap;
+	Entity* player;
 	Entity** entities;
 
-	int enemyCount;
+	int frameTime;
+	int entityCount;
+	int skill;
 
 public:
 
-	GameField();
+	GameField(int _skill);
 	~GameField();
 
-	Scene* handleEvent(const enums::GameEvent& event) override { return nullptr; };
+	Scene* handleEvent(const enums::GameEvent& event) override;
 	Scene* update() override;
 	void render(SDL_Renderer* renderer) override;
 

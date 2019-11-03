@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <chrono>
+#include <time.h>
 #include "Config.h"
 #include "MainMenu.h"
 
