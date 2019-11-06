@@ -174,6 +174,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Bonus.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\GameField.cpp" />
     <ClCompile Include="src\GamePlay.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="src\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bonus.h" />
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\GameField.h" />
     <ClInclude Include="include\Config.h" />

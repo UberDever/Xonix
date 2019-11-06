@@ -53,6 +53,19 @@ Entity* Enemy::update()
 
 /*****************************************************************************************************************************/
 
+constexpr int GAME_PARAMETERS = 5;
+
+Player::Player() : Entity()
+{
+	par.reserve(GAME_PARAMETERS);
+	std::string names[] = {"Life", "Time", "Score", "Acceleration", "Slow"};
+	unsigned values[] = { 3, 100, 0, 1, 1 };
+	for (int i = 0; i < GAME_PARAMETERS; i++)
+	{
+		par[names[i]] = values[i];
+	}
+}
+
 void Player::init(enums::TileType** _gameMap, enums::TileType _type)
 {
 	gameMap = _gameMap;
@@ -93,7 +106,7 @@ void Player::handleEvent(const enums::GameEvent& event)
 	}
 }
 
-Entity* Player::update()
+Player* Player::update()
 {
 	static enums::TileType floor = enums::TileType::Wall;
 	static int borderY = Config::getConfig().windowHeight / 18;

@@ -17,8 +17,8 @@ class GameField : public Scene
 private:
 	static int levelCounter;
 
-	enums::TileType **gameMap;
-	Entity* player;
+	enums::TileType** gameMap;
+	Player* player;
 	Entity** entities;
 
 	int frameTime;

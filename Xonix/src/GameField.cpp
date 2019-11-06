@@ -34,12 +34,12 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 
 	if (skill == 0)
 	{
-		entityCount = rand() % 6 + 5 + 1 + 1;// rand(5, 10) + 1(side) + 1(player)
+		entityCount = rand() % 6 + 5 + 1;// rand(5, 10) + 1(side)
 		skill = 6;
 	}
 	else
 	{
-		entityCount = levelCounter + 1 + 1 + 1; // 1(first enemy) + 1(side) + 1(player)
+		entityCount = levelCounter + 1 + 1; // 1(first enemy) + 1(side)
 		if (skill < 9)
 			skill++;
 		levelCounter++;
@@ -50,16 +50,15 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	int frameT[9] = { 60, 55, 50, 40, 30, 25, 20, 17, 15 };
 	frameTime = frameT[skill - 1];
 
-	for (int i = 0; i < entityCount - 2; i++)
+	for (int i = 0; i < entityCount - 1; i++)
 	{
 		entities[i] = new Enemy();
 		entities[i]->init(gameMap, enums::TileType::Enemy);
 	}
-	entities[entityCount - 2] = new Enemy();
-	entities[entityCount - 2]->init(gameMap, enums::TileType::EnemySide);
-	entities[entityCount - 1] = new Player();
-	entities[entityCount - 1]->init(gameMap, enums::TileType::PlayerSide);
-	player = entities[entityCount - 1];
+	entities[entityCount - 1] = new Enemy();
+	entities[entityCount - 1]->init(gameMap, enums::TileType::EnemySide);
+	player = new Player();
+	player->init(gameMap, enums::TileType::PlayerSide);
 }
 
 GameField::~GameField()
@@ -76,19 +75,44 @@ Scene* GameField::handleEvent(const enums::GameEvent& event)
 Scene* GameField::update()
 {
 	auto static time = SDL_GetTicks();
-	if (time + frameTime < SDL_GetTicks())
+	static unsigned slowCounter = 1;
+
+	/*if (time + 1000 < SDL_GetTicks())
 	{
-		time = SDL_GetTicks();
-		for (int i = 0; i < entityCount - 1; i++)
-		{
-			entities[i] = entities[i]->update();
-		}
-		player = entities[entityCount - 1]->update();
-		if (player == nullptr)
+		unsigned lastedTime = --player->getPar()["Time"];
+		std::cout << lastedTime << std::endl;
+		if (lastedTime == 0)
 		{
 			delete this;
 			return nullptr;
 		}
+	}*/
+
+	if (time + frameTime < SDL_GetTicks())
+	{
+		if (slowCounter % player->getPar()["Slow"] == 0)
+		{
+			for (int i = 0; i < entityCount; i++)
+			{
+				entities[i] = entities[i]->update();
+			}
+			slowCounter = 1;
+		}
+		else
+		{
+			slowCounter++;
+		}
+		unsigned acc = player->getPar()["Acceleration"];
+		for (unsigned i = 0; i < acc; i++)
+		{
+			player = player->update();
+			if (player == nullptr)
+			{
+				delete this;
+				return nullptr;
+			}
+		}
+		time = SDL_GetTicks();
 	}
 	return this;
 }

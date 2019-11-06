@@ -20,12 +20,23 @@ namespace enums
 
 	enum class TileType
 	{
-		Void,
+		Void = 0,
 		Wall,
 		PlayerSide,
 		PlayerVoid,
 		PlayerTrail,
 		Enemy,
 		EnemySide
+	};
+
+	enum class Bonus
+	{
+		Void = 0,
+		Life,
+		Time, 
+		Slow,
+		Score,
+		Acceleration,
+		Random
 	};
 }
