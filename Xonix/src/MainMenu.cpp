@@ -81,7 +81,7 @@ MainMenu::MainMenu() : objRenderer(nullptr), buttons{ nullptr }
 	buttonEndX = buttons[mainScreenButtons - 1]->getX() + buttonWidth;
 	buttonEndY = buttons[mainScreenButtons - 1]->getY() + buttonHeight;
 
-	gameField = new GameField(0);
+	gameField = new GameField(nullptr, 0);
 }
 
 MainMenu::~MainMenu()
@@ -123,7 +123,7 @@ Scene* MainMenu::handleEvent(const enums::GameEvent& event)
 				}
 				case enums::GameEvent::Start:
 				{
-					GamePlay* actualGame = new GamePlay(static_cast<Scene*>(new GameField(y_i + (x_i * buttonsInColumn) + 1)));
+					GamePlay* actualGame = new GamePlay(static_cast<Scene*>(new GameField(nullptr, y_i + (x_i * buttonsInColumn) + 1)));
 					delete this;
 					return actualGame;
 					break;
@@ -188,7 +188,7 @@ void MainMenu::render(SDL_Renderer* renderer)
 			buttons[i]->render();
 		}
 	}
-	GraphicManager::drawText(titleOffsetX, 50, 86, 94, 255, "XONIX");
+	GraphicManager::drawText(titleOffsetX, 50, 86, 94, 255, 108,"XONIX");
 }
 
 bool MainMenu::init(SDL_Window* window)
@@ -203,8 +203,6 @@ bool MainMenu::init(SDL_Window* window)
 
 	ResourceManager::getManager().init(SDL_GetRenderer(window));
 	GraphicManager::getManager().getRenderer() = SDL_GetRenderer(window);
-	GraphicManager::getManager().getFont() = TTF_OpenFont("data/fonts/font.ttf", 108);
-	BonusManager::getManager().init();
 
 	if (!gameField->init(window))
 		return false;

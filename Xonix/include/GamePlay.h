@@ -8,6 +8,7 @@ class GamePlay: public Scene
 private:
 
 	Scene* gameField;
+	//score, life
 
 public:
 	GamePlay(Scene*);

@@ -54,18 +54,15 @@ class Player : public Entity
 {
 private:
 
-	std::unordered_map<std::string, unsigned int> par; //Life, Time, Score, AccelerationValue, SlowValue 
+	std::unordered_map<std::string, unsigned int>* par; //Life, Time, Score, AccelerationValue, SlowValue 
 
 public:
 
-	Player();
+	Player(std::unordered_map<std::string, unsigned int>* _par);
 
 	void init(enums::TileType** _gameMap, enums::TileType _type) override;
 	void handleEvent(const enums::GameEvent& event);
-	//Entity* update() override {};
 	Player* update() override;
-
-	auto& getPar() { return par; };
 };
 
 //BONUSES:

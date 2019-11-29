@@ -31,6 +31,9 @@ Scene* GamePlay::update()
 	{
 		delete this;
 		return nullptr;
+	} else if (static_cast<GameField*>(gameField)->isFilled())
+	{
+		gameField = static_cast<GameField*>(gameField)->newLevel();
 	}
 	return this;
 }
@@ -42,6 +45,7 @@ void GamePlay::render(SDL_Renderer* renderer)
 
 bool GamePlay::init(SDL_Window* window)
 {
-	gameField->init(window);
+	if (!gameField->init(window))
+		return false;
 	return true;
 }
