@@ -1,12 +1,11 @@
 #include "../include/GameField.h"
 
 int GameField::levelCounter = 0;
+int GameField::width = Config::getConfig().windowWidth / 18;
+int GameField::height = Config::getConfig().windowHeight / 18;
 
-GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
+GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _skill): gameMap(nullptr), skill(_skill), par(nullptr)
 {
-	static int height = Config::getConfig().windowHeight / 18;
-	static int width = Config::getConfig().windowWidth / 18;
-
 	gameMap = new enums::TileType* [height];
 	for (int i = 0; i < (height); i++)
 	{
@@ -44,6 +43,19 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 			skill++;
 		levelCounter++;
 	}
+
+	if (par == nullptr)
+	{
+		par = new std::unordered_map<std::string, unsigned int>();
+		constexpr int GAME_PARAMETERS = 5;
+		par->reserve(GAME_PARAMETERS);
+		std::string names[] = { "Life", "Time", "Score", "Acceleration", "Slow" };
+		unsigned values[] = { 3, 100, 0, 1, 1 };
+		for (int i = 0; i < GAME_PARAMETERS; i++)
+		{
+			(*par)[names[i]] = values[i];
+		}
+	}
 	
 	entities = new Entity*[entityCount];
 
@@ -57,13 +69,23 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	}
 	entities[entityCount - 1] = new Enemy();
 	entities[entityCount - 1]->init(gameMap, enums::TileType::EnemySide);
-	player = new Player();
+	player = new Player(par);
 	player->init(gameMap, enums::TileType::PlayerSide);
 }
 
 GameField::~GameField()
 {
-
+	for (int i = 0; i < height; i++)
+	{
+		delete gameMap[i];
+	}
+	delete gameMap;
+	for (int i = 0; i < entityCount; i++)
+	{
+		delete entities[i];
+	}
+	delete entities;
+	delete player;
 }
 
 Scene* GameField::handleEvent(const enums::GameEvent& event)
@@ -90,7 +112,7 @@ Scene* GameField::update()
 
 	if (time + frameTime < SDL_GetTicks())
 	{
-		if (slowCounter % player->getPar()["Slow"] == 0)
+		if (slowCounter % (*par)["Slow"] == 0)
 		{
 			for (int i = 0; i < entityCount; i++)
 			{
@@ -102,14 +124,14 @@ Scene* GameField::update()
 		{
 			slowCounter++;
 		}
-		unsigned acc = player->getPar()["Acceleration"];
+		unsigned acc = (*par)["Acceleration"];
 		for (unsigned i = 0; i < acc; i++)
 		{
 			player = player->update();
 			if (player == nullptr)
 			{
 				delete this;
-				return nullptr;
+				return nullptr; // TODO: New scene "leaderboard"
 			}
 		}
 		time = SDL_GetTicks();
@@ -119,9 +141,6 @@ Scene* GameField::update()
 
 void GameField::render(SDL_Renderer* renderer)
 {
-	static int height = Config::getConfig().windowHeight / 18;
-	static int width = Config::getConfig().windowWidth / 18;
-
 	static SDL_Rect dstRect = { 0, 0, 18, 18 };
 
 	for (int i = 0; i < height; i++)
@@ -136,9 +155,28 @@ void GameField::render(SDL_Renderer* renderer)
 	}
 	dstRect.x = 0;
 	dstRect.y = 0;
+	GraphicManager::getManager().drawText(0, height * 18, 0xff, 0xff, 0xff, 32, "Score:");
 }
 
-bool GameField::init(SDL_Window* window)
+Scene* GameField::newLevel()
 {
-	return true;
+	delete this;
+	if (skill > 9)
+		return nullptr; // TODO: New scene "leaderboard"
+	return new GameField(par, skill + 1);
+}
+
+bool GameField::isFilled()
+{
+	static float S = width * height;
+	int counter = 0;
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			if (gameMap[i][j] == enums::TileType::Wall)
+				counter++;
+		}
+	}
+	return (counter / S) > 90;
 }

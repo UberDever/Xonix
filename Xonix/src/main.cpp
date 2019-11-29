@@ -3,6 +3,6 @@
 
 int main(int argc, char* args[])
 {
-	Game game;
-	return game.onExec();
+	Game* game = new Game();
+	return game->onExec();
 }

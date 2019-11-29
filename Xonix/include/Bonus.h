@@ -26,7 +26,7 @@ private:
 	BonusManager(const BonusManager&) = delete;
 	BonusManager& operator=(BonusManager&) = delete;
 
-	BonusManager() {};
+	BonusManager() : bonusTypes(nullptr), gameMap(nullptr) {};
 	~BonusManager()
 	{
 		delete bonusTypes;

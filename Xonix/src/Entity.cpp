@@ -1,5 +1,7 @@
 #include "../include/Entity.h"
 
+bool Entity::isPlayerAlive = true;
+
 void Enemy::BFS()
 {
 
@@ -28,23 +30,32 @@ void Enemy::handleEvent(const enums::GameEvent& event)
 
 Entity* Enemy::update()
 {
-	enums::TileType curWall = (type == enums::TileType::EnemySide) ? enums::TileType::Wall : enums::TileType::Void;
+	enums::TileType curFloor = (type == enums::TileType::EnemySide) ? enums::TileType::Wall : enums::TileType::Void;
 	static int borderY = Config::getConfig().windowHeight / 18;
 	static int borderX = Config::getConfig().windowWidth / 18;
-	gameMap[pos.y][pos.x] = curWall;
+	bool isCollision = false;
+	VECT oldVec = vec;
 	if ((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0) && (pos.x + vec.x < borderX) && (pos.x + vec.x >= 0))
 	{
-		if (gameMap[pos.y + vec.y][pos.x] != curWall) { vec.y *= -1; }
-		if (gameMap[pos.y][pos.x + vec.x] != curWall) { vec.x *= -1; }
+		if (gameMap[pos.y + vec.y][pos.x] != curFloor) { vec.y *= -1; isCollision = true; }
+		if (gameMap[pos.y][pos.x + vec.x] != curFloor) { vec.x *= -1; isCollision = true; }
+		if (gameMap[pos.y + vec.y][pos.x + vec.x] != curFloor) { vec.x *= -1; vec.y *= -1; isCollision = true; }
 	}
 	else
 	{
-		if (!((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0)))
-			vec.y *= -1;
-		if (!((pos.x + vec.x < borderX) && (pos.x + vec.x >= 0)))
-			vec.x *= -1;
-		
+		if (!((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0))) { vec.y *= -1; }
+		if (!((pos.x + vec.x < borderX) && (pos.x + vec.x >= 0))) { vec.x *= -1; }
+		//oldVec.x = oldVec.y = 0;
 	}
+	if (isCollision == true)
+	{
+		if ((gameMap[pos.y + oldVec.y][pos.x + oldVec.x] >= enums::TileType::PlayerSide) &&
+			(gameMap[pos.y + oldVec.y][pos.x + oldVec.x] <= enums::TileType::PlayerTrail))
+		{
+			isPlayerAlive = false;
+		}
+	}
+	gameMap[pos.y][pos.x] = curFloor;
 	pos.y += vec.y;
 	pos.x += vec.x;
 	gameMap[pos.y][pos.x] = type;
@@ -53,17 +64,9 @@ Entity* Enemy::update()
 
 /*****************************************************************************************************************************/
 
-constexpr int GAME_PARAMETERS = 5;
-
-Player::Player() : Entity()
+Player::Player(std::unordered_map<std::string, unsigned int>* _par) : Entity(), par(nullptr)
 {
-	par.reserve(GAME_PARAMETERS);
-	std::string names[] = {"Life", "Time", "Score", "Acceleration", "Slow"};
-	unsigned values[] = { 3, 100, 0, 1, 1 };
-	for (int i = 0; i < GAME_PARAMETERS; i++)
-	{
-		par[names[i]] = values[i];
-	}
+	par = _par;
 }
 
 void Player::init(enums::TileType** _gameMap, enums::TileType _type)
@@ -115,7 +118,7 @@ Player* Player::update()
 	{
 		vec.x = vec.y = 0;
 	}
-	if (gameMap[pos.y + vec.y][pos.x + vec.x] == enums::TileType::PlayerTrail)
+	if (gameMap[pos.y + vec.y][pos.x + vec.x] == enums::TileType::PlayerTrail || isPlayerAlive == false)
 	{
 		delete this;
 		return nullptr;
