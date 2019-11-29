@@ -2,7 +2,7 @@
 
 int GameField::levelCounter = 0;
 
-GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
+GameField::GameField(int _skill): gameMap(nullptr), skill(_skill), isScreenSaver(false)
 {
 	static int height = Config::getConfig().windowHeight / 18;
 	static int width = Config::getConfig().windowWidth / 18;
@@ -35,6 +35,7 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	if (skill == 0)
 	{
 		entityCount = rand() % 6 + 5 + 1;// rand(5, 10) + 1(side)
+		isScreenSaver = true;
 		skill = 6;
 	}
 	else
@@ -47,9 +48,6 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	
 	entities = new Entity*[entityCount];
 
-	int frameT[9] = { 60, 55, 50, 40, 30, 25, 20, 17, 15 };
-	frameTime = frameT[skill - 1];
-
 	for (int i = 0; i < entityCount - 1; i++)
 	{
 		entities[i] = new Enemy();
@@ -58,7 +56,12 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	entities[entityCount - 1] = new Enemy();
 	entities[entityCount - 1]->init(gameMap, enums::TileType::EnemySide);
 	player = new Player();
-	player->init(gameMap, enums::TileType::PlayerSide);
+	player->init(gameMap, enums::TileType::Wall); // Для отсутствия отображения в main menu
+
+	int frameT[9] = { 60, 55, 50, 40, 30, 25, 20, 17, 15 };
+	frameTime = frameT[skill - 1];
+
+	BonusManager::getManager().getMap() = gameMap;
 }
 
 GameField::~GameField()
@@ -103,7 +106,7 @@ Scene* GameField::update()
 			slowCounter++;
 		}
 		unsigned acc = player->getPar()["Acceleration"];
-		for (unsigned i = 0; i < acc; i++)
+		for (unsigned i = 0; i < acc && !isScreenSaver; i++)
 		{
 			player = player->update();
 			if (player == nullptr)
@@ -112,6 +115,7 @@ Scene* GameField::update()
 				return nullptr;
 			}
 		}
+		BonusManager::getManager().update();
 		time = SDL_GetTicks();
 	}
 	return this;
@@ -136,6 +140,7 @@ void GameField::render(SDL_Renderer* renderer)
 	}
 	dstRect.x = 0;
 	dstRect.y = 0;
+	BonusManager::getManager().render(renderer);
 }
 
 bool GameField::init(SDL_Window* window)

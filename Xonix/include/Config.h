@@ -25,6 +25,7 @@ public:
 	std::unordered_map<SDL_Keycode, enums::GameEvent> eventMap;
 	const int windowWidth = 1440;
 	const int windowHeight = 900;
+	const bool isFullscreen = false;
 
 public:
 

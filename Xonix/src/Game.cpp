@@ -26,7 +26,7 @@ bool Game::onInit()
 		return EXIT_FAILURE;
 	}
 
-	mainWindow = SDL_CreateWindow("Xonix!", 100, 100, Config::getConfig().windowWidth, Config::getConfig().windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	mainWindow = SDL_CreateWindow("Xonix!", 100, 100, Config::getConfig().windowWidth, Config::getConfig().windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (Config::getConfig().isFullscreen ? SDL_WINDOW_FULLSCREEN : 0));
 	if (mainWindow == nullptr) {
 		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return EXIT_FAILURE;

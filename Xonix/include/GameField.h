@@ -11,11 +11,13 @@
 #include "Enums.h"
 #include "Scene.h"
 #include "Entity.h"
+#include "Bonus.h"
 
 class GameField : public Scene
 {
 private:
 	static int levelCounter;
+	bool isScreenSaver;
 
 	enums::TileType** gameMap;
 	Player* player;

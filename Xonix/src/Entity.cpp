@@ -1,5 +1,7 @@
 #include "../include/Entity.h"
 
+bool Entity::isPlayerAlive = true;
+
 void Enemy::BFS()
 {
 
@@ -28,22 +30,25 @@ void Enemy::handleEvent(const enums::GameEvent& event)
 
 Entity* Enemy::update()
 {
-	enums::TileType curWall = (type == enums::TileType::EnemySide) ? enums::TileType::Wall : enums::TileType::Void;
+	enums::TileType curWall = (type == enums::TileType::EnemySide) ? enums::TileType::Void : enums::TileType::Wall;
+	enums::TileType curFloor = (type == enums::TileType::EnemySide) ? enums::TileType::Wall : enums::TileType::Void;
 	static int borderY = Config::getConfig().windowHeight / 18;
 	static int borderX = Config::getConfig().windowWidth / 18;
-	gameMap[pos.y][pos.x] = curWall;
+	gameMap[pos.y][pos.x] = curFloor;
 	if ((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0) && (pos.x + vec.x < borderX) && (pos.x + vec.x >= 0))
 	{
-		if (gameMap[pos.y + vec.y][pos.x] != curWall) { vec.y *= -1; }
-		if (gameMap[pos.y][pos.x + vec.x] != curWall) { vec.x *= -1; }
+		if (gameMap[pos.y + vec.y][pos.x + vec.x] == enums::TileType::PlayerTrail)
+		{
+			//isPlayerAlive = false;
+			//return this;
+		}
+		if (gameMap[pos.y][pos.x + vec.x] != curFloor) { vec.x *= -1; }
+		if (gameMap[pos.y + vec.y][pos.x] != curFloor) { vec.y *= -1; }
 	}
 	else
 	{
-		if (!((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0)))
-			vec.y *= -1;
-		if (!((pos.x + vec.x < borderX) && (pos.x + vec.x >= 0)))
-			vec.x *= -1;
-		
+		if (!((pos.y + vec.y < borderY) && (pos.y + vec.y >= 0))) { vec.y *= -1; }
+		if (!((pos.x + vec.x < borderX) && (pos.x + vec.x >= 0))) { vec.x *= -1; }
 	}
 	pos.y += vec.y;
 	pos.x += vec.x;
@@ -71,7 +76,7 @@ void Player::init(enums::TileType** _gameMap, enums::TileType _type)
 	gameMap = _gameMap;
 	type = _type;
 	pos.y = 0;
-	pos.x = Config::getConfig().windowWidth / 18 / 2;
+	pos.x = Config::getConfig().windowWidth / 18 / 2 - 1;
 	gameMap[pos.y][pos.x] = type;
 }
 
@@ -115,15 +120,20 @@ Player* Player::update()
 	{
 		vec.x = vec.y = 0;
 	}
-	if (gameMap[pos.y + vec.y][pos.x + vec.x] == enums::TileType::PlayerTrail)
+	if (isPlayerAlive == false || gameMap[pos.y][pos.x] >= enums::TileType::PlayerTrail)
 	{
-		delete this;
-		return nullptr;
+		//delete this;
+		//return nullptr;
 	}
 	gameMap[pos.y][pos.x] = floor == enums::TileType::Wall ? floor : enums::TileType::PlayerTrail;
 	pos.y += vec.y;
 	pos.x += vec.x;
 	floor = gameMap[pos.y][pos.x];
+	if (floor >= enums::TileType::PlayerTrail)
+	{
+		//delete this;
+		//return nullptr;
+	}
 	type = floor == enums::TileType::Void ? enums::TileType::PlayerVoid : enums::TileType::PlayerSide;
 	gameMap[pos.y][pos.x] = type;
 	return this;

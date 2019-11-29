@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "ResourceManager.h"
 #include "GraphicManager.h"
+#include "Bonus.h"
 #include "Scene.h"
 #include "GamePlay.h"
 #include "GameField.h"

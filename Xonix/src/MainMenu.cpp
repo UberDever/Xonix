@@ -204,6 +204,7 @@ bool MainMenu::init(SDL_Window* window)
 	ResourceManager::getManager().init(SDL_GetRenderer(window));
 	GraphicManager::getManager().getRenderer() = SDL_GetRenderer(window);
 	GraphicManager::getManager().getFont() = TTF_OpenFont("data/fonts/font.ttf", 108);
+	BonusManager::getManager().init();
 
 	if (!gameField->init(window))
 		return false;

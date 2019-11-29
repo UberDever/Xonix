@@ -26,7 +26,8 @@ namespace enums
 		PlayerVoid,
 		PlayerTrail,
 		Enemy,
-		EnemySide
+		EnemySide,
+		Bonus
 	};
 
 	enum class Bonus

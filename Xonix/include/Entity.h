@@ -8,6 +8,9 @@
 class Entity
 {
 protected:
+
+	static bool isPlayerAlive;
+
 	struct POS
 	{
 		int x, y;
