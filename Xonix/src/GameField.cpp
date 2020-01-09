@@ -4,7 +4,7 @@ int GameField::levelCounter = 0;
 int GameField::width = Config::getConfig().windowWidth / 18;
 int GameField::height = Config::getConfig().windowHeight / 18;
 
-GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _skill): gameMap(nullptr), skill(_skill), par(nullptr)
+GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 {
 	gameMap = new enums::TileType* [height];
 	for (int i = 0; i < (height); i++)
@@ -34,6 +34,7 @@ GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _s
 	if (skill == 0)
 	{
 		entityCount = rand() % 6 + 5 + 1;// rand(5, 10) + 1(side)
+		isScreenSaver = true;
 		skill = 6;
 	}
 	else
@@ -59,9 +60,6 @@ GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _s
 	
 	entities = new Entity*[entityCount];
 
-	int frameT[9] = { 60, 55, 50, 40, 30, 25, 20, 17, 15 };
-	frameTime = frameT[skill - 1];
-
 	for (int i = 0; i < entityCount - 1; i++)
 	{
 		entities[i] = new Enemy();
@@ -69,7 +67,7 @@ GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _s
 	}
 	entities[entityCount - 1] = new Enemy();
 	entities[entityCount - 1]->init(gameMap, enums::TileType::EnemySide);
-	player = new Player(par);
+	player = new Player();
 	player->init(gameMap, enums::TileType::PlayerSide);
 }
 
@@ -124,7 +122,7 @@ Scene* GameField::update()
 		{
 			slowCounter++;
 		}
-		unsigned acc = (*par)["Acceleration"];
+		unsigned acc = player->getPar()["Acceleration"];
 		for (unsigned i = 0; i < acc; i++)
 		{
 			player = player->update();
@@ -134,6 +132,7 @@ Scene* GameField::update()
 				return nullptr; // TODO: New scene "leaderboard"
 			}
 		}
+		BonusManager::getManager().update();
 		time = SDL_GetTicks();
 	}
 	return this;
@@ -155,15 +154,6 @@ void GameField::render(SDL_Renderer* renderer)
 	}
 	dstRect.x = 0;
 	dstRect.y = 0;
-	GraphicManager::getManager().drawText(0, height * 18, 0xff, 0xff, 0xff, 32, "Score:");
-}
-
-Scene* GameField::newLevel()
-{
-	delete this;
-	if (skill > 9)
-		return nullptr; // TODO: New scene "leaderboard"
-	return new GameField(par, skill + 1);
 }
 
 bool GameField::isFilled()
