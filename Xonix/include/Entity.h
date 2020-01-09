@@ -4,17 +4,23 @@
 #include <unordered_map>
 #include "Config.h"
 #include "Enums.h"
+#include "Bonus.h"
 
 class Entity
 {
 protected:
 
 	static bool isPlayerAlive;
+	static bool isPathCompleted;
+
+	static int borderY;
+	static int borderX;
 
 	struct POS
 	{
 		int x, y;
 		POS() : x(0), y(1) {}
+		POS(int _x, int _y) { x = _x; y = _y; }
 	} pos;
 
 	struct VECT
@@ -40,6 +46,7 @@ class Enemy : public Entity
 private:
 
 	void BFS();
+	void _bfs(POS entry);
 
 public:
 

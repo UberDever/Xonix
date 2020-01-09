@@ -1,6 +1,6 @@
 #include "../include/MainMenu.h"
 
-bool Button::init(SDL_Window* window)
+bool Button::init(SDL_Renderer* rend)
 {
 	SDL_Surface* tempSurf = nullptr;
 	SDL_Color color = { 255, 255, 255 };
@@ -20,18 +20,18 @@ bool Button::init(SDL_Window* window)
 		SDL_BlitSurface(tempText, nullptr, tempSurf, &dstRect);
 	}
 	TTF_CloseFont(font);
-	buttonTexture = SDL_CreateTextureFromSurface(SDL_GetRenderer(window), tempSurf);
+	buttonTexture = SDL_CreateTextureFromSurface(rend, tempSurf);
 	SDL_FreeSurface(tempText);
 	SDL_FreeSurface(tempSurf);
 	if (buttonTexture == nullptr)
 		return false;
-	objRenderer = SDL_GetRenderer(window);
+	objRenderer = rend;
 	if (objRenderer == nullptr)
 		return false;
 	return true;
 }
 
-MainMenu::MainMenu() : objRenderer(nullptr), buttons{ nullptr }
+MainMenu::MainMenu() : objRenderer(nullptr), buttons{ nullptr }, playerName("PLAYER_XONIX")
 {
 	for (int i = 0; i < mainScreenButtons; i++)
 	{
@@ -63,18 +63,18 @@ MainMenu::MainMenu() : objRenderer(nullptr), buttons{ nullptr }
 
 	buttons[mainScreenButtons - 1]->getString().assign(u8"Выход");
 	buttons[0]->getString().assign(u8"Начать игру");
-	buttons[1]->getString().assign(u8"Настройки");
+	buttons[1]->getString().assign(u8"Смена имени");
 	buttons[2]->getString().assign(u8"Таблица рекордов");
-	buttons[4]->getString().assign(u8"Замедленная");
-	buttons[5]->getString().assign(u8"Небыстрая");
-	buttons[6]->getString().assign(u8"Спокойная");
-	buttons[7]->getString().assign(u8"Умеренная");
-	buttons[8]->getString().assign(u8"Нормальная");
-	buttons[9]->getString().assign(u8"Ускоренная");
-	buttons[10]->getString().assign(u8"Стремительная");
-	buttons[11]->getString().assign(u8"Сверхсветовая");
-	buttons[12]->getString().assign(u8"Невозможная");
-	buttons[13]->getString().assign(u8"Назад");
+	buttons[mainScreenButtons]->getString().assign(u8"Замедленная");
+	buttons[mainScreenButtons + 1]->getString().assign(u8"Небыстрая");
+	buttons[mainScreenButtons + 2]->getString().assign(u8"Спокойная");
+	buttons[mainScreenButtons + 3]->getString().assign(u8"Умеренная");
+	buttons[mainScreenButtons + 4]->getString().assign(u8"Нормальная");
+	buttons[mainScreenButtons + 5]->getString().assign(u8"Ускоренная");
+	buttons[mainScreenButtons + 6]->getString().assign(u8"Стремительная");
+	buttons[mainScreenButtons + 7]->getString().assign(u8"Сверхсветовая");
+	buttons[mainScreenButtons + 8]->getString().assign(u8"Невозможная");
+	buttons[mainScreenButtons + 9]->getString().assign(u8"Назад");
 
 	buttonStartX = buttons[0]->getX();
 	buttonStartY = buttons[0]->getY();
@@ -90,6 +90,7 @@ MainMenu::~MainMenu()
 	{
 		delete buttons[i];
 	}
+	delete gameField;
 }
 
 Scene* MainMenu::handleEvent(const enums::GameEvent& event)
@@ -123,7 +124,8 @@ Scene* MainMenu::handleEvent(const enums::GameEvent& event)
 				}
 				case enums::GameEvent::Start:
 				{
-					GamePlay* actualGame = new GamePlay(static_cast<Scene*>(new GameField(nullptr, y_i + (x_i * buttonsInColumn) + 1)));
+					GamePlay* actualGame = new GamePlay(playerName, static_cast<Scene*>(new GameField(nullptr, y_i + (x_i * buttonsInColumn) + 1)), objRenderer);
+					buttonOffset = 0;
 					delete this;
 					return actualGame;
 					break;
@@ -146,6 +148,50 @@ Scene* MainMenu::handleEvent(const enums::GameEvent& event)
 						buttonOffset = 0;
 					}
 					break;
+				}
+				case enums::GameEvent::Options:
+				{
+					GraphicManager::clearScreen();
+					GraphicManager::drawText(Config::getConfig().windowWidth / 2 - 210, 50, 86, 94, 255, 108, u8"ВВЕДИТЕ ИМЯ");
+					SDL_RenderPresent(objRenderer);
+
+					SDL_Event in_event;
+					int len = 0;
+					bool _running = true;
+					std::string oldText = playerName;
+
+					SDL_StartTextInput();
+					while (_running) {
+						SDL_Event event;
+						if (SDL_PollEvent(&event)) {
+							switch (event.type) {
+							case SDL_KEYDOWN:
+								if (event.key.keysym.sym == SDLK_ESCAPE)
+								{
+									playerName = oldText;
+									_running = false;
+								}
+								else if (event.key.keysym.sym == SDLK_RETURN)
+									_running = false;
+								else if (event.key.keysym.sym == SDLK_BACKSPACE)
+									playerName.pop_back();
+								break;
+							case SDL_TEXTINPUT:
+								playerName += event.text.text;
+								break;
+							}
+						}
+						GraphicManager::clearScreen();
+						GraphicManager::drawText(Config::getConfig().windowWidth / 2 - 430, 50, 86, 94, 255, 108, u8"ВВЕДИТЕ ИМЯ");
+						GraphicManager::drawText(Config::getConfig().windowWidth / 2 - 128, Config::getConfig().windowHeight / 2, 255, 255, 255, 32, playerName);
+						SDL_RenderPresent(objRenderer);
+					}
+
+					break;
+				}
+				case enums::GameEvent::LeaderBoard:
+				{
+					return new LeaderBoard(this, objRenderer);
 				}
 				default:
 					break;
@@ -191,20 +237,21 @@ void MainMenu::render(SDL_Renderer* renderer)
 	GraphicManager::drawText(titleOffsetX, 50, 86, 94, 255, 108,"XONIX");
 }
 
-bool MainMenu::init(SDL_Window* window)
+bool MainMenu::init(SDL_Renderer* renderer)
 {
 	for (int i = 0; i < maxButtons; i++)
-		if (!buttons[i]->init(window))
+		if (!buttons[i]->init(renderer))
 			return false;
 
-	objRenderer = SDL_GetRenderer(window);
+	objRenderer = renderer;
 	if (objRenderer == nullptr)
 		return false;
 
-	ResourceManager::getManager().init(SDL_GetRenderer(window));
-	GraphicManager::getManager().getRenderer() = SDL_GetRenderer(window);
+	ResourceManager::getManager().init(renderer);
+	GraphicManager::getManager().getRenderer() = renderer;
+	BonusManager::getManager().init();
 
-	if (!gameField->init(window))
+	if (!gameField->init(renderer))
 		return false;
 	return true;
 }

@@ -18,7 +18,7 @@ namespace enums
 		MouseButtonPressed
 	};
 
-	enum class TileType
+	enum class TileType // Order and position is important
 	{
 		Void = 0,
 		Wall,
@@ -27,17 +27,20 @@ namespace enums
 		PlayerTrail,
 		Enemy,
 		EnemySide,
-		Bonus
+		BonusVoid,
+		BonusWall,
+		BonusMarked,
+		Marked
 	};
 
 	enum class Bonus
 	{
 		Void = 0,
 		Life,
-		Time, 
-		Slow,
+		Time,
 		Score,
 		Acceleration,
+		Slow,
 		Random
 	};
 }

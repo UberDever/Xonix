@@ -7,6 +7,8 @@
 #include <SDL_image.h>
 #include "ResourceManager.h"
 #include "GraphicManager.h"
+#include "LeaderBoard.h"
+#include "Bonus.h"
 #include "Config.h"
 #include "Enums.h"
 #include "Scene.h"
@@ -23,6 +25,9 @@ private:
 	Player* player;
 	Entity** entities;
 
+	std::string name;
+	SDL_Renderer* objRenderer;
+
 	int frameTime;
 	int entityCount;
 	int skill;
@@ -37,7 +42,8 @@ public:
 	Scene* update() override;
 	void render(SDL_Renderer* renderer) override;
 
-	bool init(SDL_Window* window) { return true; };
+	bool init(SDL_Renderer* renderer) override;
 	Scene* newLevel();
 	bool isFilled();
+	int querryScore() { return (*par)["Score"]; }
 };

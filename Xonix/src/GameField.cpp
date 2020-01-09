@@ -4,7 +4,7 @@ int GameField::levelCounter = 0;
 int GameField::width = Config::getConfig().windowWidth / 18;
 int GameField::height = Config::getConfig().windowHeight / 18;
 
-GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
+GameField::GameField(std::unordered_map<std::string, unsigned int>* _par, int _skill): gameMap(nullptr), skill(_skill), par(_par), objRenderer(nullptr)
 {
 	gameMap = new enums::TileType* [height];
 	for (int i = 0; i < (height); i++)
@@ -34,15 +34,16 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	if (skill == 0)
 	{
 		entityCount = rand() % 6 + 5 + 1;// rand(5, 10) + 1(side)
-		isScreenSaver = true;
 		skill = 6;
 	}
 	else
 	{
-		entityCount = levelCounter + 1 + 1; // 1(first enemy) + 1(side)
+		entityCount = levelCounter + 3 + 1; // 3(first 3 enemy) + 1(side)
 		if (skill < 9)
-			skill++;
-		levelCounter++;
+		{
+			levelCounter++;
+		}
+		
 	}
 
 	if (par == nullptr)
@@ -51,11 +52,18 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 		constexpr int GAME_PARAMETERS = 5;
 		par->reserve(GAME_PARAMETERS);
 		std::string names[] = { "Life", "Time", "Score", "Acceleration", "Slow" };
-		unsigned values[] = { 3, 100, 0, 1, 1 };
+		unsigned values[] = { 3, 99, 0, 1, 1 };
 		for (int i = 0; i < GAME_PARAMETERS; i++)
 		{
 			(*par)[names[i]] = values[i];
 		}
+	}
+	else
+	{
+		(*par)["Score"] += 15000 * (skill - 1);
+		(*par)["Acceleration"] = 1;
+		(*par)["Slow"] = 1;
+		(*par)["Time"] = 99;
 	}
 	
 	entities = new Entity*[entityCount];
@@ -67,8 +75,11 @@ GameField::GameField(int _skill): gameMap(nullptr), skill(_skill)
 	}
 	entities[entityCount - 1] = new Enemy();
 	entities[entityCount - 1]->init(gameMap, enums::TileType::EnemySide);
-	player = new Player();
+	player = new Player(par);
 	player->init(gameMap, enums::TileType::PlayerSide);
+
+	int frameT[9] = { 60, 55, 50, 40, 30, 25, 20, 17, 15 };
+	frameTime = frameT[skill - 1];
 }
 
 GameField::~GameField()
@@ -95,18 +106,8 @@ Scene* GameField::handleEvent(const enums::GameEvent& event)
 Scene* GameField::update()
 {
 	auto static time = SDL_GetTicks();
+	auto static gameTime = SDL_GetTicks();
 	static unsigned slowCounter = 1;
-
-	/*if (time + 1000 < SDL_GetTicks())
-	{
-		unsigned lastedTime = --player->getPar()["Time"];
-		std::cout << lastedTime << std::endl;
-		if (lastedTime == 0)
-		{
-			delete this;
-			return nullptr;
-		}
-	}*/
 
 	if (time + frameTime < SDL_GetTicks())
 	{
@@ -122,31 +123,47 @@ Scene* GameField::update()
 		{
 			slowCounter++;
 		}
-		unsigned acc = player->getPar()["Acceleration"];
+
+		unsigned acc = (*par)["Acceleration"];
 		for (unsigned i = 0; i < acc; i++)
 		{
 			player = player->update();
 			if (player == nullptr)
 			{
 				delete this;
-				return nullptr; // TODO: New scene "leaderboard"
+				return nullptr;
 			}
 		}
 		BonusManager::getManager().update();
 		time = SDL_GetTicks();
 	}
+
+	if (gameTime + 1000 < SDL_GetTicks())
+	{
+		unsigned lastedTime = (*par)["Time"]--;
+		if (lastedTime == 0)
+		{
+			delete this;
+			return nullptr;
+		}
+		gameTime = SDL_GetTicks();
+	}
+
 	return this;
 }
 
 void GameField::render(SDL_Renderer* renderer)
 {
 	static SDL_Rect dstRect = { 0, 0, 18, 18 };
+	static int screenY = Config::getConfig().windowHeight;
+	static int screenX = Config::getConfig().windowWidth;
 
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			SDL_RenderCopy(renderer, ResourceManager::getManager().sprites[(int)gameMap[i][j]], nullptr, &dstRect);
+			if ((int)gameMap[i][j] < 7)
+				SDL_RenderCopy(renderer, ResourceManager::getManager().mainSprites[(int)gameMap[i][j]], nullptr, &dstRect);
 			dstRect.x += 18;
 		}
 		dstRect.x = 0;
@@ -154,6 +171,37 @@ void GameField::render(SDL_Renderer* renderer)
 	}
 	dstRect.x = 0;
 	dstRect.y = 0;
+	BonusManager::getManager().render(renderer);
+	GraphicManager::clearTray();
+	GraphicManager::getManager().drawText(0, height * 18, 0xff, 0xff, 0xff, 32, "Score:");
+	GraphicManager::getManager().drawText(142, height * 18, 0xff, 0xff, 0xff, 32, (*par)["Score"]);
+	GraphicManager::getManager().drawText(screenX / 2 - 75, height * 18, 0xff, 0xff, 0xff, 32, "Time:");
+	GraphicManager::getManager().drawText(screenX / 2 + 25, height * 18, 0xff, 0xff, 0xff, 32, (*par)["Time"]);
+	GraphicManager::getManager().drawText(screenX - 130, height * 18, 0xff, 0xff, 0xff, 32, "Life:");
+	GraphicManager::getManager().drawText(screenX - 30, height * 18, 0xff, 0xff, 0xff, 32, (*par)["Life"]);
+}
+
+bool GameField::init(SDL_Renderer* renderer)
+{
+	objRenderer = renderer;
+
+	BonusManager::getManager().clear();
+	BonusManager::getManager().setMap(gameMap);
+
+	return true;
+}
+
+Scene* GameField::newLevel()
+{
+	auto _par = par;
+	auto _skill = skill;
+	if (_skill >= 9)
+	{
+		delete this;
+		return nullptr;
+	}
+	delete this;
+	return new GameField(_par, _skill + 1);
 }
 
 bool GameField::isFilled()
@@ -168,5 +216,6 @@ bool GameField::isFilled()
 				counter++;
 		}
 	}
-	return (counter / S) > 90;
+	float area = (counter / S);
+	return area > 0.8;
 }

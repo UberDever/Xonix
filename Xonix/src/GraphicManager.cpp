@@ -13,7 +13,7 @@ void GraphicManager::drawText(int X, int Y, uint8_t R, uint8_t G, uint8_t B, int
 	{
 		(*fonts)[size] = TTF_OpenFont("data/fonts/font.ttf", size);
 	}
-	SDL_Surface* tempS = TTF_RenderText_Blended((*fonts)[size], text.c_str(), c);
+	SDL_Surface* tempS = TTF_RenderUTF8_Blended((*fonts)[size], text.c_str(), c);
 	SDL_Texture* tempT = SDL_CreateTextureFromSurface(renderer, tempS);
 	SDL_QueryTexture(tempT, nullptr, nullptr, &r.w, &r.h);
 	SDL_RenderCopy(renderer, tempT, nullptr, &r);
@@ -34,6 +34,7 @@ void GraphicManager::drawText(int X, int Y, uint8_t R, uint8_t G, uint8_t B, int
 	SDL_Surface* tempS = TTF_RenderText_Blended((*fonts)[size], std::to_string(num).c_str(), c);
 	SDL_Texture* tempT = SDL_CreateTextureFromSurface(renderer, tempS);
 	SDL_QueryTexture(tempT, nullptr, nullptr, &r.w, &r.h);
+	SDL_RenderFillRect(renderer, &r);
 	SDL_RenderCopy(renderer, tempT, nullptr, &r);
 	SDL_FreeSurface(tempS);
 	SDL_DestroyTexture(tempT);

@@ -26,7 +26,9 @@ bool Game::onInit()
 		return EXIT_FAILURE;
 	}
 
-	mainWindow = SDL_CreateWindow("Xonix!", 100, 100, Config::getConfig().windowWidth, Config::getConfig().windowHeight + 36 /*status bar offset*/, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	mainWindow = SDL_CreateWindow("Xonix!", 100, 100, Config::getConfig().windowWidth, Config::getConfig().windowHeight + 36 /*status bar offset*/, SDL_WINDOW_SHOWN | (Config::getConfig().isFullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+	if (Config::getConfig().isFullscreen == true)
+		SDL_MaximizeWindow(mainWindow);
 	if (mainWindow == nullptr) {
 		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return EXIT_FAILURE;
@@ -52,7 +54,7 @@ int Game::onExec()
 		return GAME_INIT;
 
 	Scene* mainScene = new MainMenu();
-	if (!mainScene->init(mainWindow))
+	if (!mainScene->init(SDL_GetRenderer(mainWindow)))
 		return MENU_INIT;
 
 	uint32_t currentTime = SDL_GetTicks();
@@ -68,16 +70,18 @@ int Game::onExec()
 				if (Config::getConfig().parseEvent(rawEvent, gameEvent))
 					mainScene = mainScene->handleEvent(gameEvent);
 				if (mainScene == nullptr)
-					return 0;
+				{
+					break;
+				}
 			}
-
-			mainScene = mainScene->update();
 
 			if (mainScene == nullptr)
 			{
 				isRunning = false;
 				continue;
 			}
+
+			mainScene = mainScene->update();
 
 			mainScene->render(mainRenderer);
 			SDL_RenderPresent(mainRenderer);

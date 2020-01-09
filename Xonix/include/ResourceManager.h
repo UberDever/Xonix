@@ -14,7 +14,8 @@ private:
 	~ResourceManager();
 public:
 
-	SDL_Texture* sprites[7]; //PlayerOnSide, PlayerOnVoid, trail, wall, void, enemySide, enemyField
+	SDL_Texture* mainSprites[7]; //PlayerOnSide, PlayerOnVoid, trail, wall, void, enemySide, enemyField
+	SDL_Texture* bonusSprites[7]; //6 types + 1 void (for association)
 
 public:
 	static ResourceManager& getManager()

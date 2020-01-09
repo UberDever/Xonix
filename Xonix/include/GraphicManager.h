@@ -2,6 +2,7 @@
 
 #include "SDL.h"
 #include "SDL_ttf.h"
+#include "Config.h"
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -30,4 +31,14 @@ public:
 
 	static void drawText(int X, int Y, uint8_t R, uint8_t G, uint8_t B, int size, std::string text);
 	static void drawText(int X, int Y, uint8_t R, uint8_t G, uint8_t B, int size, int num);
+	static void clearScreen()
+	{
+		static SDL_Rect r = { 0, 0, Config::getConfig().windowWidth, Config::getConfig().windowHeight + 36};
+		SDL_RenderFillRect(renderer, &r);
+	}
+	static void clearTray()
+	{
+		static SDL_Rect r = {0, Config::getConfig().windowHeight, Config::getConfig().windowWidth , 36};
+		SDL_RenderFillRect(renderer, &r);
+	}
 };

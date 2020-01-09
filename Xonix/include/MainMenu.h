@@ -11,6 +11,7 @@
 #include "Scene.h"
 #include "GamePlay.h"
 #include "GameField.h"
+#include "LeaderBoard.h"
 
 class Button
 {
@@ -31,7 +32,7 @@ public:
 
 	~Button() { SDL_DestroyTexture(buttonTexture); }
 
-	bool init(SDL_Window* window);
+	bool init(SDL_Renderer* rend);
 
 	void render() { SDL_RenderCopy(objRenderer, buttonTexture, nullptr, &rect); }
 
@@ -54,6 +55,7 @@ private:
 	static constexpr int offsetX = 100;
 	static constexpr int buttonsInColumn = (maxButtons - mainScreenButtons) / 2;
 	int buttonStartX, buttonStartY, buttonEndX, buttonEndY;
+	std::string playerName;
 	SDL_Renderer* objRenderer;
 	Button *buttons[maxButtons];
 
@@ -64,7 +66,7 @@ public:
 	Scene* update() override;
 	void render(SDL_Renderer* renderer) override;
 
-	bool init(SDL_Window* window);
+	bool init(SDL_Renderer* renderer);
 
 	MainMenu();
 	~MainMenu();
