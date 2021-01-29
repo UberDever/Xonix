@@ -16,10 +16,10 @@ The bonuses are following:
 
 # Screenshots
 ## Title screen
-![Logo](https://github.com/UberDever/Xonix/blob/master/Xonix/data/sprites/xonix.png)
+![Title](https://github.com/UberDever/Xonix/blob/master/Xonix/data/sprites/xonix.png)
 
 ## Gameplay
-![Logo](https://github.com/UberDever/Xonix/blob/master/Xonix/data/sprites/game.png)
+![Game](https://github.com/UberDever/Xonix/blob/master/game.png)
 
 ## LeaderBoard
-![Logo](https://github.com/UberDever/Xonix/blob/master/Xonix/data/sprites/leader.png)
+![Leader](https://github.com/UberDever/Xonix/blob/master/leader.png)
